@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+langchain-core
+langchain-community
+langchain-openai
+python-dotenv
+fastapi-cors
+pydantic
+python-dotenv
+langchain
+openai
+sqlitedict
+qdrant-client
+pymongo
