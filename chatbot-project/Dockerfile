@@ -1,48 +1,44 @@
-# Use an official Node runtime as the base image
-FROM node:14 as build
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy package.json and package-lock.json
-COPY frontend/package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the frontend code
-COPY frontend/ ./
-
-# Build the app
-RUN npm run build
-
-# Use an official Python runtime as the base image
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
 # Set the working directory in the container
 WORKDIR /app
 
-# Install MongoDB
-RUN apt-get update && apt-get install -y mongodb
-
-# Copy the requirements file into the container
+# Copy the backend requirements file into the container
 COPY backend/requirements.txt .
 
-# Install the required packages
+# Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install MongoDB tools
+RUN apt-get update && apt-get install -y mongodb-clients
+
 # Copy the backend code into the container
-COPY backend/ ./backend/
+COPY backend/ backend/
 
-# Copy the built React app
-COPY --from=build /app/build ./frontend/build
+# Copy the frontend code into the container
+COPY frontend/my-nextjs-chat-app/ frontend/my-nextjs-chat-app/
 
-# Copy the entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Install Node.js
+RUN apt-get update && apt-get install -y nodejs npm
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Set working directory to frontend
+WORKDIR /app/frontend/my-nextjs-chat-app
 
-# Use the entrypoint script to run the application
-ENTRYPOINT ["/entrypoint.sh"]
+# Install frontend dependencies
+RUN npm install
+
+# Build the frontend
+RUN npm run build
+
+# Set working directory back to /app
+WORKDIR /app
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
+
+# Define environment variable
+ENV PYTHONUNBUFFERED 1
+
+# Run the application
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "${PORT:-8000}"]

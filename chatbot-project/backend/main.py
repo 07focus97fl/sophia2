@@ -29,8 +29,10 @@ app.add_middleware(
 )
 
 # Initialize MongoDB
-mongo_client = MongoClient(os.getenv("MONGODB_URL"))
-db = mongo_client.sophia_db
+mongo_url = os.getenv("MONGODB_URL")
+mongo_client = MongoClient(mongo_url)
+db_name = mongo_url.split("/")[-1].split("?")[0]  # Extract database name from URL
+db = mongo_client[db_name]
 users_collection = db.users
 chatlogs_collection = db.chatlogs
 
@@ -228,4 +230,4 @@ async def chat(chat_message: ChatMessage, request: Request, token: str = Depends
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
