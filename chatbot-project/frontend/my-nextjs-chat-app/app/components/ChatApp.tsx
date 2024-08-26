@@ -50,7 +50,7 @@ export default function ChatApp() {
           const data = await response.json()
           localStorage.setItem('access_token', data.access_token)
           setIsLoggedIn(true)
-          setMessages([{ role: 'assistant', content: `Hello ${username}! How can I assist you today?` }])
+          // Removed the initial message
         } else {
           console.error('Login failed')
         }
