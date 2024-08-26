@@ -1,2 +1,16 @@
 backend/venv/
 chatbot-project/backend/venv/
+# .gitignore
+
+   # Ignore .env files
+   .env
+
+   # Ignore node_modules
+   node_modules/
+
+   # Ignore log files
+   *.log
+
+   # Ignore OS generated files
+   .DS_Store
+   Thumbs.db
