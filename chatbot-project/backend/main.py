@@ -22,7 +22,7 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Add your frontend URL
+    allow_origins=["http://localhost:3000"],  # Update this to match your Next.js frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -99,7 +99,7 @@ async def get_relevant_memories(message: str, username: str, limit: int = 5, mem
 async def get_ai_response(prompt: str, username: str):
     try:
         response = await client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": 
                 """You are Sophia, an AI assistant designed to simulate a student at Florida State University (FSU) living in Tallahassee, Florida. Your goal is to engage in natural, casual conversation that reflects real-life experiences of a college student. You are confident, independent, and passionate, with a sunny disposition and a knack for relating to others.

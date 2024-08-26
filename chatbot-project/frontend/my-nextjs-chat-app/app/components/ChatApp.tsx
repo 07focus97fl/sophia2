@@ -34,11 +34,29 @@ export default function ChatApp() {
     }
   }, [darkMode])
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (username.trim()) {
-      setIsLoggedIn(true)
-      setMessages([{ role: 'assistant', content: `Hello ${username}! How can I assist you today?` }])
+      try {
+        const response = await fetch('http://localhost:8000/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username: username }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          localStorage.setItem('access_token', data.access_token)
+          setIsLoggedIn(true)
+          setMessages([{ role: 'assistant', content: `Hello ${username}! How can I assist you today?` }])
+        } else {
+          console.error('Login failed')
+        }
+      } catch (error) {
+        console.error('Error during login:', error)
+      }
     }
   }
 
@@ -47,20 +65,39 @@ export default function ChatApp() {
     setUsername('')
     setMessages([])
     setUserInput('')
+    localStorage.removeItem('access_token')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (userInput.trim()) {
       const newUserMessage: Message = { role: 'user', content: userInput }
       setMessages(prevMessages => [...prevMessages, newUserMessage])
       setUserInput('')
       
-      // Simulate AI response
-      setTimeout(() => {
-        const assistantMessage: Message = { role: 'assistant', content: `This is a simulated response to "${userInput}".` }
-        setMessages(prevMessages => [...prevMessages, assistantMessage])
-      }, 1000)
+      try {
+        const response = await fetch('http://localhost:8000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          },
+          body: JSON.stringify({
+            message: userInput,
+            username: username,
+          }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          const assistantMessage: Message = { role: 'assistant', content: data.response }
+          setMessages(prevMessages => [...prevMessages, assistantMessage])
+        } else {
+          console.error('Failed to get AI response')
+        }
+      } catch (error) {
+        console.error('Error during chat:', error)
+      }
     }
   }
 
